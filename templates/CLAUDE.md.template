@@ -1,0 +1,66 @@
+# CLAUDE.md
+
+Guidance for Claude Code (claude.ai/code) working in this repository.
+
+## Project
+
+**{{PROJECT_NAME}}** — {{PROJECT_DESCRIPTION}}
+
+## Stack
+
+{{STACK}}
+
+## Commands
+
+```bash
+{{QUALITY_GATES}}
+```
+
+## Module / architecture rules
+
+{{MODULE_RULES}}
+
+## Canonical domain documents
+
+These documents are the source of truth for product/domain behaviour. Agents must read the relevant ones before planning or implementing anything that touches the area they cover. If code or design contradicts a canonical document, the document wins — agents should raise the conflict instead of silently diverging.
+
+{{DOMAIN_DOCS}}
+
+## Agent workflows (CAW)
+
+Two orchestrated slash commands drive phase delivery:
+
+- **`/new-phase <description>`** — `architect` writes plan → `coordinator` reviews and creates task specs.
+- **`/run-phase`** — `executor` implements each task → `coordinator` reviews code → phase sign-off.
+
+Agent definitions live in `.claude/agents/`. Each file declares its `model:` in YAML front-matter — that is the authoritative model assignment regardless of the calling session's model.
+
+| Agent | Model | Role |
+|-------|-------|------|
+| `architect` | opus | Designs phase plans (`docs/workflow/planning/phaseN_plan.md`). Does not write code. |
+| `coordinator` | opus | Reviews plans, creates task specs, reviews executor output, manages queue. Does not write code. |
+| `executor` | sonnet | Implements one task, runs quality gates, writes delivery report. Does not plan or commit. |
+{{EXTRA_AGENTS_ROWS}}
+
+**Cross-review rule:** the coordinator's code review receives only the task spec + list of changed files. It reads the code directly — never the executor's narrative. Independent verdict.
+
+**Escalation rule:** technical decisions → resolved by agents. Business / behavioural ambiguity → agents stop and ask the user.
+
+**Commit rule:** the coordinator never commits automatically. Always waits for explicit user instruction.
+
+**Language rule:** all CAW workflow markdown files (task specs, reports, reviews, plans, sign-offs, the task queue) are written in **{{WORKFLOW_LANGUAGE}}**.
+
+## Phase terminology
+
+{{PHASE_TERMINOLOGY}}
+
+## Workflow (CAW)
+
+| Artefact | Path |
+|----------|------|
+| Current task + backlog | `docs/workflow/task_queue.md` |
+| Task spec | `docs/workflow/tasks/task_NNN_*.md` |
+| Delivery report | `docs/workflow/reports/task_NNN_report.md` |
+| Coordinator review | `docs/workflow/reports/task_NNN_coordinator_review.md` |
+| Phase plan + sign-off | `docs/workflow/planning/phaseN_plan.md` |
+| Roadmap | `docs/workflow/planning/project_plan.md` |
